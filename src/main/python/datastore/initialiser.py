@@ -1,18 +1,23 @@
 import psycopg2
 
-def setup_database():
+from src.main.python.configuration_storage import Configs
+
+
+def setup_database(config_file_path):
     commands = [
         '''
         CREATE TABLE reminder (
+            discord_id TEXT NOT NULL,
             player TEXT NOT NULL,
-            timeframe long NOT NULL
-            PRIMARY KEY (player, timeframe)
+            reminder_time INTEGER NOT NULL,
+            PRIMARY KEY (discord_id, reminder_time)
+        );
         '''
     ]
 
     try:
         # connect to the PostgreSQL server
-        config = __get_config()
+        config = Configs(config_file_path).get_all_configs()
         conn = psycopg2.connect(dbname='mlnbot',user=config['user'],password=config['password'],port=config['port'],host=config['host'])
         cur = conn.cursor()
         # create table one by one
@@ -31,11 +36,6 @@ def setup_database():
 def purge_database():
     pass
 
-def __get_config():
-    configs = {}
-    config_file = open('dbconfig.cfg','r')
-    for line in config_file:
-        split_line = line.split('=')
-        configs[split_line[0]] = split_line[1]
 
-    return configs
+if __name__ == '__main__':
+    setup_database()
