@@ -1,11 +1,15 @@
-from time import sleep
-
-import discord
 import sys
 
-from src.main.python.discord import reader
+import discord
+
+from src.main.python.datastore.reminderDAO import ReminderDAO
+from src.main.python.reminders.notification_service import set_notification
+from src.main.python.scouting.scoutingBotRunner import handle_scouting_request
 
 bot = discord.Client()
+ready = False
+token = None
+reminder_dao = ReminderDAO("/home/george/repos/discordSwingReminder/dbconfig.cfg")
 
 @bot.event
 async def on_ready():
@@ -16,24 +20,39 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    reader.handle_message(message)
+    if message.author == bot.user:
+        return
+
+    content = message.content
+    if content.startswith('!activate'):
+        bot.send_message(message.channel, "I am alive!")
+    if content.startswith('!help'):
+        __show_help(message.channel)
+    if content.startswith('!player-notify'):
+        player = message.author
+        words = content.split(' ')
+        response = set_notification(reminder_dao, player.id, str(player), player.name, words[1], words[2])
+        await bot.send_message(message.channel, "<@" + str(player.id) + ">" + response)
+    if content.startswith('!scouting'):
+        response = handle_scouting_request(content)
+        await bot.send_message(message.channel, response)
+    if content.startswith('!gm-notify'):
+        pass
+    if content.startswith('!show-reminders'):
+        results = reminder_dao.select_all()
+        all_data = 'I found the following results for you: \n'
+        for result in results:
+            all_data += result[0] + ": " + str(result[1]) + '\n'
+        bot.send_message(message.channel, all_data)
+
+def __show_help(channel):
+    bot.send_message(channel,
+                   "!player-notify: <time>\n" +
+                   "!gm-notify: <time>\n")
 
 async def send_message_to_channel(message, text):
     await bot.wait_until_ready()
     bot.send_message(message.channel, text)
-
-async def send_reminder_direct_message():
-    await bot.wait_until_ready()
-    bot.send_message(person, text)
-
-'''
-Waits until ready and then is able to return the instance for better
-'''
-def get_bot_instance():
-    while not ready:
-        sleep(5)
-
-    return bot
 
 if __name__ == '__main__':
     args = sys.argv

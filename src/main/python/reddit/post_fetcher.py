@@ -15,7 +15,7 @@ def get_all_players_to_swing(reddit):
         if current_post.is_game_day_thread and not current_post.has_current_player_swung():
             player = current_post.get_current_player()
             if player is not None:
-                players.append(player)
+                players.append(player, post_time)
 
     return players
 

@@ -21,9 +21,9 @@ def remind_players(configs):
         return
 
     for player in players_who_need_to_swing:
-        reminders = reminderDao.select_by_reddit_name(player.user)
+        reminders = reminderDao.get_reminders_by_reddit_name(player[0])
         for reminder in reminders:
-            if reminder.time < player.time:
+            if reminder.time < player[1]:
                 for member in members:
                     if member.id == reminders.discord_id:
                         bot.send_message(member, "Hey " + member.name +

@@ -2,6 +2,7 @@ import psycopg2
 
 from src.main.python.configuration_storage import Configs
 
+
 class ReminderDAO():
     def __init__(self, config_file_path):
         configs = Configs(config_file_path)
@@ -15,7 +16,7 @@ class ReminderDAO():
     def select_by_id_and_time(self, discord_id, time_number):
         query = "select * from reminder"
         query += " where discord_id = '" + discord_id + "'"
-        query += ' and time_number = ' + str(time_number)
+        query += ' and reminder_time = ' + str(time_number)
         return self.select(query)
 
     def select_by_player(self, player):
@@ -38,18 +39,6 @@ class ReminderDAO():
             reminders_to_return.append([result[0], result[1]])
 
         return reminders_to_return
-
-    def add_reminder(self, discord_id, player, time_number):
-        results = self.select_by_id_and_time(discord_id, time_number)
-
-        # If this loop executes, this reminder already exists.  Return without updating
-        for result in self.cur:
-            return False
-
-        query = "insert into reminder values('" + discord_id + "', '" + player + "', " + str(time_number) + ");"
-        self.__query(query)
-        self.conn.commit()
-        return True
 
     def close(self):
         self.cur.close()

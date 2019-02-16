@@ -1,6 +1,4 @@
-def parse_timeframe(content):
-    parts = content.split(' ')
-
+def parse_timeframe(parts):
     if len(parts) != 3:
         return [], "Improperly formatted message! Proper usage: <command> <number> <unit> such as !notify-player 2 hours"
 

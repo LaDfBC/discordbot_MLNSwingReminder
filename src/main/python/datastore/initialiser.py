@@ -6,8 +6,15 @@ from src.main.python.configuration_storage import Configs
 def setup_database(config_file_path):
     commands = [
         '''
-        CREATE TABLE reminder (
+        CREATE TABLE player (
             discord_id TEXT NOT NULL,
+            reddit_name TEXT NOT NULL,
+            player_name TEXT NOT NULL,
+            PRIMARY KEY (discord_id)
+        );
+        
+        CREATE TABLE reminder (
+            discord_id TEXT NOT NULL references player(discord_id),
             player TEXT NOT NULL,
             reminder_time INTEGER NOT NULL,
             PRIMARY KEY (discord_id, reminder_time)
@@ -38,4 +45,4 @@ def purge_database():
 
 
 if __name__ == '__main__':
-    setup_database()
+    setup_database("/home/george/repos/discordSwingReminder/dbconfig.cfg")
