@@ -1,6 +1,6 @@
 from googleSheets.sheetsAuthenticator import get_spreadsheet_service
 from googleSheets.row_organizer import PITCHER, PITCH_VALUE, get_row_as_dict, BATTER, SWING_VALUE
-from scouting import groupValuesByRange, analyzeStreak
+from scouting.distributionAnalyzer import groupValuesByRange, analyzeStreak
 
 '''
 Uses a filename on the local machine and a pitcher name to analyze to fetch all of pitches thrown by the named person

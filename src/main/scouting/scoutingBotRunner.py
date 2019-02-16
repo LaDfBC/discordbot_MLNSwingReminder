@@ -1,4 +1,4 @@
-from scouting import run_report_on
+from scouting.pitch_fetcher import run_report_on
 
 
 def handle_scouting_request(message):

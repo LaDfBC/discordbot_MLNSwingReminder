@@ -4,7 +4,7 @@ import discord
 
 from datastore.reminderDAO import ReminderDAO
 from reminders.notification_service import set_notification
-from scouting import handle_scouting_request
+from scouting.scoutingBotRunner import handle_scouting_request
 
 bot = discord.Client()
 ready = False

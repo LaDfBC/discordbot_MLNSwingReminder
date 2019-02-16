@@ -1,4 +1,4 @@
-from googleSheets import get_player_name_by_discord_name
+from googleSheets.player_fetcher import get_player_name_by_discord_name
 
 
 def validate_time(time_number, time_units):

@@ -1,4 +1,4 @@
-import discord
+import discordModule
 import sys
 
 from configuration_storage import Configs
@@ -34,7 +34,7 @@ def remind_players(configs):
 
 if __name__ == '__main__':
     configs = Configs(sys.argv[1])
-    bot = discord.Client()
+    bot = discordModule.Client()
     bot.wait_until_ready()
 
     remind_players(configs)
