@@ -9,7 +9,6 @@ from scouting.scoutingBotRunner import handle_scouting_request
 bot = discord.Client()
 ready = False
 token = None
-reminder_dao = ReminderDAO("/home/george/repos/discordSwingReminder/dbconfig.cfg")
 
 @bot.event
 async def on_ready():
@@ -57,5 +56,7 @@ async def send_message_to_channel(message, text):
 if __name__ == '__main__':
     args = sys.argv
     token = args[1]
+    file_path = args[2]
 
+    reminder_dao = ReminderDAO(file_path)
     bot.run(token)
