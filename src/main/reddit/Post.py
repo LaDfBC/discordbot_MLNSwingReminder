@@ -11,6 +11,20 @@ class Post:
     def is_game_thread(self):
         return self.is_game_day_thread
 
+    def get_last_comment_time(self):
+        if self.post.link_flair_text == 'Exhibition Game' or \
+                self.post.link_flair_text[-8:] == 'Game Day' or \
+                self.post.link_flair_text == 'Winter Training':
+            # We're returning this sucker.  It has every pitch in the game (hopefully!)
+
+            # Start pulling pitches and adding them to the list
+            for comment in self.post.comments:
+                # Figure out which player is batting
+                return comment.time()
+
+    def get_users(self):
+        return self.users_to_position_players.keys()
+
     def __assign_teams__(self):
         text = self.post.selftext
         teams = {}
@@ -61,12 +75,14 @@ class Post:
         if len(self.post.comments) == 0:
             return False
 
-        first_comment = self.post.comments[0]
+        first_comment = self.post.comments[-1]
         # Toplevel comment is not a player, so we assume it's a pitcher or some random idiot
-        if first_comment is None or self.__get_player_from_comment__(first_comment) is None:
+        if first_comment is None:
+            return False
+        if self.__get_player_from_comment__(first_comment) is None:
             return False
         # True if there's at least one comment, false otherwise
-        return len(self.post.comments[0].replies) > 0
+        return len(first_comment.replies) > 0
 
     @staticmethod
     def __get_player_from_comment__(comment):
