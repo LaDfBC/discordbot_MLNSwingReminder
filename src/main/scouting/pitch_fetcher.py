@@ -1,5 +1,5 @@
 from googleSheets.sheetsAuthenticator import get_spreadsheet_service
-from googleSheets.row_organizer import PITCHER, PITCH_VALUE, get_row_as_dict, BATTER, SWING_VALUE, GAME_NUMBER
+from googleSheets.row_organizer import PITCHER, PITCH_VALUE, get_row_as_dict, BATTER, SWING_VALUE, GAME_NUMBER, OFF_TEAM
 from scouting.distributionAnalyzer import groupValuesByRange, analyzeStreak
 
 '''
@@ -85,9 +85,9 @@ def fetchPitchesByPitcherAndGoogleSheet(spreadsheet_id, player_name, batter = Fa
             if not batter:
                 if converted_row[PITCHER].lower() == player_name:
                     if converted_row[PITCH_VALUE] != '':
-                        # if current_game is None or current_game != converted_row[GAME_NUMBER]:
-                        #     current_game = converted_row[GAME_NUMBER]
-                        #     first_pitches.append(int(converted_row[PITCH_VALUE]))
+                        if current_game is None or current_game != converted_row[GAME_NUMBER]:
+                            current_game = converted_row[GAME_NUMBER]
+                            first_pitches.append(int(converted_row[PITCH_VALUE]))
                         data.append(int(converted_row[PITCH_VALUE]))
 
                         if previous_pitch is not None:
@@ -96,9 +96,9 @@ def fetchPitchesByPitcherAndGoogleSheet(spreadsheet_id, player_name, batter = Fa
             else:
                 if converted_row[BATTER].lower() == player_name:
                     if converted_row[SWING_VALUE] != '':
-                        # if current_game is None or current_game != converted_row[GAME_NUMBER]:
-                        #     current_game = converted_row[GAME_NUMBER]
-                        #     first_pitches.append(int(converted_row[SWING_VALUE]))
+                        if current_game is None or current_game != converted_row[GAME_NUMBER]:
+                            current_game = converted_row[GAME_NUMBER]
+                            first_pitches.append(int(converted_row[SWING_VALUE]))
                         data.append(int(converted_row[SWING_VALUE]))
 
                         if previous_pitch is not None:
@@ -107,6 +107,32 @@ def fetchPitchesByPitcherAndGoogleSheet(spreadsheet_id, player_name, batter = Fa
         else:
             row_number += 1
     return data, deltas, first_pitches
+
+'''
+Fetches the last x number of pitches sent against a certain team.  The team should be referenced by the team abbreviation
+and the pitch_count parameter should be how many pitches to record.
+
+team_abbrevation: i.e., MAL, SUN, etc.
+pitch_count: The number of pitches to return
+mlr: True if this should use the MLR spreadsheet, false if it should use MLN (BROKEN)
+'''
+def get_last_pitches_against_team(team_abbreviation, pitch_count, mlr=False):
+    spreadsheets = get_spreadsheet_service()
+    result = spreadsheets.values().get(spreadsheetId='1vR8T-nZwJFYj8yKDwt0999FHzfZEEfFArZ2m1OsxPx8', range="All PAs").execute()
+    values = result.get('values')
+    row_number = 1
+    data = []
+
+    for row in values:
+        if len(row) >= 19 and row_number >= 2851:
+            converted_row = get_row_as_dict(row, mlr, is_list=True)
+            if converted_row[OFF_TEAM] == team_abbreviation:
+                if converted_row[SWING_VALUE] != '':
+                    data.append(int(converted_row[SWING_VALUE]))
+        else:
+            row_number += 1
+
+    return data[-10:]
 
 def get_pitches_and_deltas_for(pitcher_name, is_batter=False):
     pitches, deltas, first_pitches = fetchPitchesByPitcherAndLocalFile("/home/george/Downloads/mlnmaster1.csv", pitcher_name,
@@ -143,15 +169,16 @@ def run_report_on(pitcher_name, show_deltas=False, split=100):
 
 if __name__ == '__main__':
     # MLN
-    pitches, deltas, first_pitches = get_pitches_and_deltas_for("Miss Bats")
+    pitches, deltas, first_pitches = get_pitches_and_deltas_for("Rascal Alex")
 
     #MLR
-    # pitches,deltas, fp = fetchPitchesByPitcherAndGoogleSheet("1cLXbbffR0Ra1yHfFDI6fihkaXJA1rOrnrrocAXNzHKw", 'Y.E. Wally', mlr=True, batter = False)
-    # pitches2,deltas2, fp = fetchPitchesByPitcherAndGoogleSheet("1JxXUlVbF_c72OA_f9wdykNNkJ0k4Z49vsUl8J-qNzJA", 'Y.E. Wally', mlr=True, batter = False)
-    # pitches = pitches + pitches2
-    # deltas = deltas + deltas2
+    # pitches1,deltas1,fp1 = fetchPitchesByPitcherAndGoogleSheet("1Ly548wp9BqhlnEY-WIZWQ-R_NdwY77HtdNC8eVU5Jg0", 'Joe Runzer', mlr=True, batter = False)
+    # pitches2,deltas2,fp2 = fetchPitchesByPitcherAndGoogleSheet("1J1eV7tVK8bsVPWUmhzuiPQThwf8kzP6Uk4rZ0EFufdA", 'Joe Runzer', mlr=True, batter = False)
+    # pitches = pitches1 + pitches2
+    # deltas = deltas1 + deltas2
+    # first_pitches = fp1 + fp2
 
-    result = get_scouting_data_as_list(pitches, 50, deltas=False)
+    result = get_scouting_data_as_list(pitches, 100, deltas=False)
 
     result = analyzeStreak(deltas, range_size=100, numbers=[-999,1001])
     print(result)

@@ -3,7 +3,11 @@ from reddit.Post import Post
 import sys
 import praw
 
-def get_all_players_to_swing(reddit):
+CONFIG_FILE_DEFAULT = '/home/george/repos/discordSwingReminder/dbconfig.cfg'
+
+def get_all_players_to_swing(reddit = None, team=None):
+    if reddit == None:
+        reddit = getPrawInstance(CONFIG_FILE_DEFAULT)
     posts = reddit.subreddit("BaseballbytheNumbers").hot(limit = 25)
     players = []
 
@@ -14,9 +18,10 @@ def get_all_players_to_swing(reddit):
         current_post = Post(post)
         # try:
         if current_post.is_game_day_thread and not current_post.has_current_player_swung():
-            player = current_post.get_current_player()
-            if player is not None:
-                players.append({'reddit_name': player, 'time': current_post.get_last_comment_time()})
+            if team is None or current_post.team_name_one == team or current_post.team_name_two == team:
+                player = current_post.get_current_player()
+                if player is not None:
+                    players.append({'reddit_name': player, 'time': current_post.get_last_comment_time()})
 
     return players
 
@@ -36,6 +41,16 @@ def get_time_left_for_swing(reddit, player):
                 return current_post.get_current_player(), current_post.get_last_comment_time()
 
     return None, None
+
+def get_pitcher_and_batter_for_team(team, config_file):
+    reddit = getPrawInstance(config_file)
+    posts = reddit.subreddit("baseballbythenumbers").hot(limit = 25)
+
+    for post in posts:
+        current_post = Post(post)
+        if current_post.team_name_one == team or current_post.team_name_two == team:
+            return current_post.get_current_player(), current_post.get_current_pitcher()
+
 
 ''' 
 Gets a Reddit instance via PRAW, which is a nice wrapper over Reddit

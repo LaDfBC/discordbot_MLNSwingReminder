@@ -12,15 +12,13 @@ class Post:
         return self.is_game_day_thread
 
     def get_last_comment_time(self):
-        if self.post.link_flair_text == 'Exhibition Game' or \
-                self.post.link_flair_text[-8:] == 'Game Day' or \
-                self.post.link_flair_text == 'Winter Training':
+        if self.__is_game_day_thread__():
             # We're returning this sucker.  It has every pitch in the game (hopefully!)
 
             # Start pulling pitches and adding them to the list
             for comment in self.post.comments:
                 # Figure out which player is batting
-                return comment.time()
+                return comment.created
 
     def get_users(self):
         return self.users_to_position_players.keys()
@@ -60,15 +58,14 @@ class Post:
 
     # Hoo boy, this is the nasty function
     def get_current_player(self):
-        if self.post.link_flair_text == 'Exhibition Game' or \
-                self.post.link_flair_text[-8:] == 'Game Day' or \
-                self.post.link_flair_text == 'Winter Training':
+        if self.__is_game_day_thread__():
             # We're returning this sucker.  It has every pitch in the game (hopefully!)
+            comment = self.post.comments[-1] # Very last one
+            # Figure out which player is batting
+            return self.__get_player_from_comment__(comment)
 
-            # Start pulling pitches and adding them to the list
-            for comment in self.post.comments:
-                # Figure out which player is batting
-                return self.__get_player_from_comment__(comment)
+    def get_current_pitcher(self):
+        return pitchers
 
     def has_current_player_swung(self):
         # No comments here - move along...
@@ -83,6 +80,15 @@ class Post:
             return False
         # True if there's at least one comment, false otherwise
         return len(first_comment.replies) > 0
+
+    '''
+    True if this thread is a GDT, false otherwise.
+    '''
+    def __is_game_day_thread__(self):
+        return self.post.link_flair_text == 'Exhibition Game' or \
+            self.post.link_flair_text[-8:] == 'Game Day' or \
+            self.post.link_flair_text == 'Winter Training' or \
+            'GotS' in self.post.link_flair_text
 
     @staticmethod
     def __get_player_from_comment__(comment):
@@ -132,6 +138,34 @@ class Post:
             batters_index = batter_close_index
 
         return players
+
+    #TODO - broke as hell
+    def __fetch_pitchers__(self):
+        pitchers_index = 0
+        text = self.post.selftext
+
+        text.find("Pitchers")
+
+        # This is watching for replaced team members. Otherwise, we have issues with parsing
+        triple_pipe_check = text.find("|||", pitchers_index)
+        batter_open_index = text.find("[", pitchers_index)
+        batter_close_index = text.find("]", batter_open_index)
+        batter_name = text[batter_open_index + 1: batter_close_index]
+
+        if triple_pipe_check != -1 and triple_pipe_check < batter_open_index:
+            first_team = not first_team
+
+        username_open_index = text.find("(", batter_close_index)
+        username_close_index = text.find(")", username_open_index)
+        username = text[username_open_index + 1: username_close_index].lower().replace(" ", "")
+
+        if first_team:
+            players[self.team_name_one][username] = batter_name
+        else:
+            players[self.team_name_two][username] = batter_name
+        first_team = not first_team
+
+        batters_index = batter_close_index
 
 
 def get_team_abbreviation_list():

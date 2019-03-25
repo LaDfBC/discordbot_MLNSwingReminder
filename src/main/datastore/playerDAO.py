@@ -31,8 +31,8 @@ class PlayerDAO():
         return self.select(query)[0][1]
 
     def get_player_by_reddit_name(self, reddit_name):
-        query = "select * from player where reddit_name = '" + reddit_name + "';"
-        return self.select(query)[0][0]
+        query = "select * from player where lower(reddit_name) = '" + reddit_name + "';"
+        return self.select(query)[0]
 
     def select(self, query):
         self.__start_query()
