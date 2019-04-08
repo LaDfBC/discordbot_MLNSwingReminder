@@ -26,6 +26,7 @@ OFF_TEAM = 'offense'
 DEF_TEAM = 'defense'
 GAME_NUMBER = 'game_number'
 
+
 def get_row_as_dict(row, mlr=False, is_list=False):
     if not is_list:
         split_row = row.split(',')
@@ -36,6 +37,7 @@ def get_row_as_dict(row, mlr=False, is_list=False):
         return __get_mlr_row__(split_row)
     else:
         return __get_mln_row__(split_row)
+
 
 def __get_mlr_row__(split_row):
     ret_dict = {}
@@ -57,6 +59,7 @@ def __get_mlr_row__(split_row):
     ret_dict[RUNS_SCORED_ON_PLAY] = split_row[14]
 
     return ret_dict
+
 
 def __get_mln_row__(split_row):
     ret_dict = {}

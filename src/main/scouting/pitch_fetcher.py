@@ -169,7 +169,7 @@ def run_report_on(pitcher_name, show_deltas=False, split=100):
 
 if __name__ == '__main__':
     # MLN
-    pitches, deltas, first_pitches = get_pitches_and_deltas_for("Rascal Alex")
+    pitches, deltas, first_pitches = get_pitches_and_deltas_for("Calvin Huff")
 
     #MLR
     # pitches1,deltas1,fp1 = fetchPitchesByPitcherAndGoogleSheet("1Ly548wp9BqhlnEY-WIZWQ-R_NdwY77HtdNC8eVU5Jg0", 'Joe Runzer', mlr=True, batter = False)

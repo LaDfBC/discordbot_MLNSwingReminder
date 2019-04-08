@@ -23,7 +23,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-    await init_scouting_timer(token, bot, player_dao)
+    await init_scouting_timer(bot, player_dao)
     # init_reminder_timer()
 
 def send_reminder_ping_with_scouting(token, server_id):
